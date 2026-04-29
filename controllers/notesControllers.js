@@ -8,7 +8,9 @@ const createNote = (req, res) => {
 
   // Basic validation
   if (!title || !content) {
-    return res.status(400).json({ message: "Title and content are required." });
+    const err = new Error("Title and content are required");
+    err.status = 400;
+    throw err;
   }
 
   // Mock response (replace with DB logic later)
@@ -33,8 +35,9 @@ const getNotesID = (req, res) => {
   const note = notes.find((n) => n.id == id);
 
   if (!note) {
-    console.log("req.params:", req.params);
-    return res.status(404).json({ message: "Note not found" });
+    const err = new Error("Note not found");
+    err.status = 404;
+    throw err;
   }
 
   res.status(200).json({
@@ -45,7 +48,6 @@ const getNotesID = (req, res) => {
 
 const getNotes = (req, res) => {
   console.log("GET api/notes", req.query);
-
   res.status(200).json({
     message: "Fetched all notes",
     notes: notes,
@@ -58,14 +60,10 @@ const updateNote = (req, res) => {
 
   const note = notes.find((n) => n.id === id);
   if (!note) {
-    return res.status(404).json({
-      message: "Note not found",
-    });
+    return next(new Error("Note not found"));
   }
   if (!note || !content) {
-    return res.status(400).json({
-      message: "Title and content are required.",
-    });
+    return next(new Error("Title and content are required"));
   }
 
   note.title = title;
@@ -81,10 +79,11 @@ const deleteNote = (req, res) => {
   const { id } = req.params;
   const note = notes.find((n) => n.id === id);
   if (!note) {
-    return res.status(404).json({
-      message: "Note not found",
-    });
+    const err = new Error("Note not found");
+    err.status = 404;
+    err.throw;
   }
+
   notes.filter((n) => n.id !== id);
   res.status(200).json({
     message: "Note deleted successfully",
